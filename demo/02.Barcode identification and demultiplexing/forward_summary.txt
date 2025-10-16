@@ -1,0 +1,6 @@
+total_seqs: 50719
+link_right: 45071
+barcode1_count: 44322
+barcode2_count: 43616
+barcode3_count: 43604
+triple_barcodes_count: 42863
