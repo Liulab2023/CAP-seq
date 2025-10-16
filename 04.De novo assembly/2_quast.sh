@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J miniasm
+#SBATCH -J quast
 #SBATCH -p dm_pub_cpu
 #SBATCH -N 1
 #SBATCH -n 32
