@@ -1,4 +1,4 @@
-![GitHub watchers](https://img.shields.io/github/watchers/Liulab2023/CAP-seq?style=flat&logo=Github&color=blue)[![Stars](https://img.shields.io/github/stars/Liulab2023/CAP-seq?style=flat&logo=GitHub&color=blue)](https://github.com/Liulab2023/CAP-seq/stargazers)
+![GitHub watchers](https://img.shields.io/github/watchers/Liulab2023/CAP-seq?style=flat&logo=Github&color=blue) [![Stars](https://img.shields.io/github/stars/Liulab2023/CAP-seq?style=flat&logo=GitHub&color=blue)](https://github.com/Liulab2023/CAP-seq/stargazers)
 # Analysis Workflow for **Large-scale single-cell long-read genomics enables high-resolution microbiome profiling using cap-seq**
 
 ## Description
@@ -262,6 +262,7 @@ bioRxiv 2024.09.10.612220; doi: https://doi.org/10.1101/2024.09.10.612220
 
 
 For technical support or to report issues, please open an issue on the GitHub repository.
+
 
 
 
