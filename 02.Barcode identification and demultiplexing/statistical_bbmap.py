@@ -14,7 +14,7 @@ def count_sequences_in_fastq_files(input_directory, output_file_path, threshold)
     sequence_counts = []
 
 
-    # 创建新的文件夹来存储移动的文件
+    # Create a new folder to store the moved files
     new_directory = os.path.join(output_file_path, 'bbmap_output_many_seqs')
     if not os.path.exists(new_directory):
         os.makedirs(new_directory)
@@ -46,9 +46,9 @@ def count_sequences_in_fastq_files(input_directory, output_file_path, threshold)
 
     with open(args.output_file_path + "/bbmap_statistica.txt", 'w') as output_file:
         output_file.write(f"Total files: {total_files}\n")
-        output_file.write(f"Moved files: {moved_files}\n")  # 更改为 "Moved files"
-        output_file.write(f"Total sequences before moving: {total_sequences_before_moving}\n")  # 更改为 "Total sequences before moving"
-        output_file.write(f"Total sequences after moving: {total_sequences_after_moving}\n")  # 更改为 "Total sequences after moving"
+        output_file.write(f"Moved files: {moved_files}\n")  # refer to "Moved files"
+        output_file.write(f"Total sequences before moving: {total_sequences_before_moving}\n")  # refer to "Total sequences before moving"
+        output_file.write(f"Total sequences after moving: {total_sequences_after_moving}\n")  # refer to "Total sequences after moving"
         output_file.write("Number of files with specific sequence counts:\n")
         #for sequence_count, file_count in sorted(sequence_count_dict.items()):
             #output_file.write(f"{sequence_count} sequences: {file_count} files\n")
