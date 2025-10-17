@@ -1,4 +1,3 @@
-#!/home/zhaixuanpei/anaconda3/bin/python
 import argparse
 import pandas as pd
 import os
