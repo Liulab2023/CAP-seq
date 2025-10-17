@@ -150,7 +150,7 @@ def main():
         f.write('Percent for single forward match: ' + str(matched_seq / total_seq) + '\n')
         f.write('Percent for single reverse match: ' + str(re_matched_seq / total_seq) + '\n')
         f.write('Percent for complementary match: ' + str(complementary_matched_seq / total_seq) + '\n')
-        f.write('Percent for multiple match: 多' + str(multiple_matched_seq / total_seq) + '\n')
+        f.write('Percent for multiple match: ' + str(multiple_matched_seq / total_seq) + '\n')
         f.write('Percent for failed match: ' + str(fail_matched_seq / total_seq) + '\n')
 
 if __name__ == "__main__":
