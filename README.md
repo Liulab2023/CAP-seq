@@ -124,6 +124,7 @@ numpy
 ## Demo
 
 ### Instructions to Run on Demo Data
+You can get complete demo data and results from https://zenodo.org/records/17385053.
 
 1. **Prepare demo data**:
 
@@ -271,6 +272,7 @@ bioRxiv 2024.09.10.612220; doi: https://doi.org/10.1101/2024.09.10.612220
 
 
 For technical support or to report issues, please open an issue on the GitHub repository.
+
 
 
 
