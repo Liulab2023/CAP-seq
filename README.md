@@ -20,23 +20,23 @@ This is a comprehensive bioinformatics pipeline for single-cell genomics data an
 
 ### Software Dependencies
 
-- **Operating Systems**: Linux (tested on Ubuntu 24.04)
-- **Python**: 3.12.3
+- **Operating Systems**: Linux (tested on ![Static Badge](https://img.shields.io/badge/Ubuntu-24.04-blue))
+- **Python**: ![Static Badge](https://img.shields.io/badge/Version-3.12.3-blue)
 - **Key Tools and Versions**:
-  - Dorado v0.8.3 (basecalling)
-  - NanoFilt v2.8.0 (quality filtering)
-  - Cutadapt v5.1 (adapter trimming)
-  - BBMap v39.37 (demultiplexing)
-  - Minimap2 v2.30 (alignment)
-  - Samtools v1.22.1 (BAM processing)
-  - Miniasm v r179 (de novo assembly)
-  - QUAST v5.3.0 (assembly quality assessment)
-  - CheckM v1.0.13 (genome completeness assessment)
+  - Dorado ![Static Badge](https://img.shields.io/badge/Version-0.8.3-blue) (basecalling)
+  - NanoFilt  ![Static Badge](https://img.shields.io/badge/Version-2.8.0-blue)(quality filtering)
+  - Cutadapt ![Static Badge](https://img.shields.io/badge/Version-5.1-blue) (adapter trimming)
+  - BBMap ![Static Badge](https://img.shields.io/badge/Version-39.37-blue) (demultiplexing)
+  - Minimap2 ![Static Badge](https://img.shields.io/badge/Version-2.30-blue) (alignment)
+  - Samtools ![Static Badge](https://img.shields.io/badge/Version-1.22.1-blue) (BAM processing)
+  - Miniasm ![Static Badge](https://img.shields.io/badge/Version-r179-blue) (de novo assembly)
+  - QUAST ![Static Badge](https://img.shields.io/badge/Version-5.3.0-blue) (assembly quality assessment)
+  - CheckM ![Static Badge](https://img.shields.io/badge/Version-1.0.13-blue) (genome completeness assessment)
 
 ### GPU Requirements
 
 - **Dorado basecaller** requires a GPU with proper VRAM (recommended 16GB+ for large datasets)
-- **CUDA**: Version 11.0 or higher (compatible with Dorado v0.8.3)
+- **CUDA**: ![Static Badge](https://img.shields.io/badge/Version-11.0-blue) or higher (compatible with Dorado ![Static Badge](https://img.shields.io/badge/Version-0.8.3-blue))
 - **NVIDIA drivers**: Latest stable version recommended
 
 ### Python Dependencies
@@ -271,6 +271,7 @@ bioRxiv 2024.09.10.612220; doi: https://doi.org/10.1101/2024.09.10.612220
 
 
 For technical support or to report issues, please open an issue on the GitHub repository.
+
 
 
 
