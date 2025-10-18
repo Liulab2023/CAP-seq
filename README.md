@@ -168,13 +168,9 @@ You can get complete demo data and results from https://zenodo.org/records/17385
 
 1. **Environment Setup**:
 
-   bash
-
    ```
    conda activate captain
    ```
-
-   
 
 2. **Configuration**:
 
@@ -215,34 +211,22 @@ You can get complete demo data and results from https://zenodo.org/records/17385
 
 1. **Environment activation fails**:
 
-   bash
-
    ```
    conda deactivate
    conda activate captain
    ```
 
-   
-
 2. **Missing Python packages**:
-
-   bash
 
    ```
    conda env update -f environment.yaml
    ```
 
-   
-
 3. **Permission denied for scripts**:
-
-   bash
 
    ```
    chmod +x *.sh
    ```
-
-   
 
 ## Citation
 
@@ -260,6 +244,7 @@ bioRxiv 2024.09.10.612220; doi: https://doi.org/10.1101/2024.09.10.612220
 
 
 For technical support or to report issues, please open an issue on the GitHub repository.
+
 
 
 
