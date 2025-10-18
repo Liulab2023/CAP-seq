@@ -5,6 +5,15 @@
 
 This is a comprehensive bioinformatics pipeline for single-cell genomics data analysis, including basecalling, barcode demultiplexing, quality assessment, and de novo assembly of single amplified genomes (SAGs).
 
+## Contents
+
+- [System Requirements](#System Requirements)
+- [Installation Guide](#Installation Guide)
+- [Demo](#Demo)
+- [Instructions for Use](#Instructions for Use)
+- [Troubleshooting](#Troubleshooting)
+- [Citation](#Citation)
+- [Support](#Support)
 
 
 ## System Requirements
@@ -262,6 +271,7 @@ bioRxiv 2024.09.10.612220; doi: https://doi.org/10.1101/2024.09.10.612220
 
 
 For technical support or to report issues, please open an issue on the GitHub repository.
+
 
 
 
