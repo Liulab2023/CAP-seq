@@ -79,35 +79,23 @@ numpy
 
 1. **Clone the repository**:
 
-   bash
-
    ```
    git clone https://github.com/Liulab2023/CAP-seq
    cd CAP-seq
    ```
 
-   
-
 2. **Create and activate Conda environment from environment.yaml**:
-
-   bash
 
    ```
    conda env create -f environment.yaml
    conda activate captain
    ```
 
-   
-
 3. **Verify installation**:
-
-   bash
 
    ```
    python -c "import pandas, Bio, pysam; print('All packages imported successfully')"
    ```
-
-   
 
 4. **Download and install external tools**:
 
@@ -272,6 +260,7 @@ bioRxiv 2024.09.10.612220; doi: https://doi.org/10.1101/2024.09.10.612220
 
 
 For technical support or to report issues, please open an issue on the GitHub repository.
+
 
 
 
