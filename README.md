@@ -104,8 +104,8 @@ numpy
 
 ### Typical Install Time
 
-- **Conda environment setup**: 2-3h minutes (due to comprehensive bioinformatics packages)
-- **Complete installation**: 3-4h minutes on a standard desktop computer
+- **Conda environment setup**: 2-3 hours (due to comprehensive bioinformatics packages)
+- **Complete installation**: 3-4 hours on a standard desktop computer
 
 
 
@@ -244,6 +244,7 @@ bioRxiv 2024.09.10.612220; doi: https://doi.org/10.1101/2024.09.10.612220
 
 
 For technical support or to report issues, please open an issue on the GitHub repository.
+
 
 
 
