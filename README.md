@@ -29,7 +29,7 @@ This is a comprehensive bioinformatics pipeline for single-cell genomics data an
   - BBMap ![Static Badge](https://img.shields.io/badge/Version-39.37-blue) (demultiplexing)
   - Minimap2 ![Static Badge](https://img.shields.io/badge/Version-2.30-blue) (alignment)
   - Samtools ![Static Badge](https://img.shields.io/badge/Version-1.22.1-blue) (BAM processing)
-  - Miniasm ![Static Badge](https://img.shields.io/badge/Version-r179-blue) (de novo assembly)
+  - Miniasm ![Static Badge](https://img.shields.io/badge/Version-0.3-blue) (de novo assembly)
   - QUAST ![Static Badge](https://img.shields.io/badge/Version-5.3.0-blue) (assembly quality assessment)
   - CheckM ![Static Badge](https://img.shields.io/badge/Version-1.0.13-blue) (genome completeness assessment)
 
