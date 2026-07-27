@@ -112,7 +112,7 @@ numpy
 ## Demo
 
 ### Instructions to Run on Demo Data
-You can get complete demo data and results from [10.5281/zenodo.21253175](https://doi.org/10.5281/zenodo.21253175).
+You can get complete demo data and results from https://doi.org/10.5281/zenodo.21271206.
 
 1. **Prepare demo data**:
 
