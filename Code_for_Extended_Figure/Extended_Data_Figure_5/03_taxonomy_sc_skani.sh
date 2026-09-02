@@ -18,4 +18,4 @@ for fastq_file in "$dir"/*.fq.gz; do
   rm ./miniasm_paf_output/"$base_name".paf.gz ./miniasm_paf_output/"$base_name".gfa
 done
 
-skani search ./miniasm_fasta_output/*.fasta \
+skani search ./miniasm_fasta_output/*.fasta
