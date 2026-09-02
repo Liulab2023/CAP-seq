@@ -496,3 +496,25 @@ for(i in seq_along(levels)) {
     message("Saved abundance bar plot: ", outfile_bar)
   }
 }
+#-------------------------------------------------------------------------------
+##diversity
+library(vegan)
+
+df <- readxl::read_xlsx("./merge_dist_Species.xlsx")  
+df = as.data.frame(df);rownames(df) = df[,1]
+df = df[,-1]
+df_t <- t(df)
+
+shannon <- diversity(df_t, index = "shannon")  
+
+simpson <- diversity(df_t, index = "simpson")  
+
+inv_simpson <- diversity(df_t, index = "invsimpson")
+
+result <- data.frame(
+  Sample = names(shannon),
+  Shannon = shannon,
+  Simpson_1_minus_D = simpson,
+  InvSimpson = inv_simpson
+)
+print(result)
