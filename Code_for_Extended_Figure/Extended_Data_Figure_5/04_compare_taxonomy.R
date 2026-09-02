@@ -117,12 +117,12 @@ for(i in 1:length(levels)){
   skani_level_long <- skani_level %>% 
     rownames_to_column("level") %>%
     pivot_longer(-level, names_to = "sample", values_to = "abundance") %>%
-    mutate(method = "Single cell")
+    mutate(method = "CAP-seq in house pipeline")
   
   sag_level_long <- sag_level %>% 
     rownames_to_column("level") %>%
     pivot_longer(-level, names_to = "sample", values_to = "abundance") %>%
-    mutate(method = "SAG")
+    mutate(method = "CAP-seq SAG MetaPhlan4")
   
   uncl_meta_long <- metaphlan_uncl %>%
     rownames_to_column("taxon") %>%
@@ -133,13 +133,13 @@ for(i in 1:length(levels)){
   uncl_skani_long <- skani_uncl %>%
     rownames_to_column("taxon") %>%
     pivot_longer(-taxon, names_to = "sample", values_to = "abundance") %>%
-    mutate(level = "Unclassified", method = "Single cell") %>%
+    mutate(level = "Unclassified", method = "CAP-seq in house pipeline") %>%
     select(-taxon)
   
   uncl_sag_long <- sag_uncl %>%
     rownames_to_column("taxon") %>%
     pivot_longer(-taxon, names_to = "sample", values_to = "abundance") %>%
-    mutate(level = "Unclassified", method = "SAG") %>%
+    mutate(level = "Unclassified", method = "CAP-seq SAG MetaPhlan4") %>%
     select(-taxon)
   # Merge with level-specific data
   combined_level <- bind_rows(metaphlan_level_long, skani_level_long,sag_level_long,
@@ -167,21 +167,24 @@ for(i in 1:length(levels)){
   combined_summary <- combined_summary %>%
     complete(method, level, fill = list(prop = 0, abundance = 0))
   
-  combined_summary$method = factor(combined_summary$method,levels = c("Metagenome","Single cell","SAG"))
+  combined_summary$method = factor(combined_summary$method,levels = c("Metagenome","CAP-seq in house pipeline","CAP-seq SAG MetaPhlan4"))
+  stat <- combined_level %>%
+    group_by( level)%>%
+    summarise(abundance = sum(abundance), .groups = "drop")
+  stat = stat[order(-stat$abundance),]
+  index = which(stat$level %in% c("Others","Unclassified"))
+  valid = stat$level[c(setdiff(1:nrow(stat),index),index[1],index[2])]
+  
   npg_base <- pal_npg()(10)           # NPG base 10 colours
   n_levels <- length(unique(combined_summary$level))
   
-  if (n_levels <= 10) {
-    # Within 10, use NPG directly
-    fill_scale <- scale_fill_npg()
-  } else if (n_levels <= 20) {
-    # 10-20 use D3 category20 (similar style)
-    fill_scale <- scale_fill_manual(values = scico::scico(n_levels, palette = "batlow"))
-  } else {
-    # 20-50 use IGV or NPG interpolated extension
-    extended <- colorRampPalette(npg_base)(n_levels)
-    fill_scale <- scale_fill_manual(values = extended)
-  } 
+  extended <- colorRampPalette(npg_base)(n_levels)
+  set.seed(1)
+  color_mapping <- setNames(extended[sample(x = n_levels)], valid)
+  color_mapping[n_levels] = "darkgrey"
+  fill_scale <- scale_fill_manual(values = color_mapping)
+  
+  combined_summary$level <- factor(combined_summary$level, levels = valid)
   
   # Draw alluvial / Sankey-style plot
   p <- ggplot(combined_summary,
