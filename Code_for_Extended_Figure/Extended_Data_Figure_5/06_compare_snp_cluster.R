@@ -156,6 +156,7 @@ p_bar_manual <- ggplot(inter_df, aes(x = factor(xid), y = n)) +
 
 ggsave("upset_top_bar.pdf", p_bar_manual, width = 8, height = 6)
 
+#--------------------------------------------------------------------------
 ##hierarchical clustering
 library(data.table)
 data1 <- fread("snp.tsv",sep = "\n",header = F) 
