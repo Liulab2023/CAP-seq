@@ -3,12 +3,12 @@ library(dplyr)
 library(data.table)
 library(ggplot2)
 library(ggvenn)
-inStrain = readxl::read_xlsx("merge_snv.xlsx")
+inStrain = readxl::read_xlsx("SNP_metagenomics_inStrain.xlsx")
 inStrain = as.data.frame(inStrain)
-Single_cell = fread("snp_all.tsv")
+Single_cell = fread("SNP_CAP-seq_snippy.tsv")
 Single_cell = as.data.frame(Single_cell)
 Single_cell = Single_cell[which(Single_cell$count >= 5),]
-sc_instrain = readxl::read_xlsx("sc_SNVs.xlsx")
+sc_instrain = readxl::read_xlsx("SNP_CAP-seq-pooled_inStrain.xlsx")
 sc_instrain = as.data.frame(sc_instrain)
 inStrain = inStrain[which(inStrain$scaffold == "NC_006347.1"),]
 Single_cell = Single_cell[which(Single_cell$ref == "NC_006347.1"),]
