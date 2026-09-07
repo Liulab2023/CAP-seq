@@ -12,6 +12,7 @@ This repository contains a complete bioinformatics pipeline for comparing **CAP-
 - **Comprehensive visualization** in R, including Alluvial/Sankey diagrams, UpSet plots, Venn diagrams, and hierarchical clustering of SNP profiles.
 
 The primary goal is to systematically evaluate the concordance and discrepancies between single-cell-derived taxonomic/SNP calls and those obtained from bulk shotgun metagenomes.
+Source data can be found in https://doi.org/10.5281/zenodo.21253175.
 
 ---
 
