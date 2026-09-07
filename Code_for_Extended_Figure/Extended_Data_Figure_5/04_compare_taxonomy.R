@@ -1,3 +1,204 @@
+############################################################################################
+####  Processing of Taxonomic Annotation Results
+############################################################################################
+
+#  ==========================================================================================
+# Metagenomics
+#  ==========================================================================================
+
+setwd("./Metagenomics")
+library(data.table)
+meta = fread("merge_output_gtdb.txt")
+meta = meta[c(1,which(grepl("s__",meta$`#clade_name`) == TRUE)),]
+colnames(meta) = c("clade_name","relative_abundance")
+write.table(meta,file = "metaphlan_merged.tsv",sep = "\t",row.names = F,quote = F)
+
+#  ==========================================================================================
+# CAP-seq (in house pipeline)
+#  ==========================================================================================
+
+setwd("../CAP-seq (in house pipeline)")
+# Load required package
+library(data.table)
+
+# Define root directory
+root <- "./"
+annot <- fread(file.path(root, "gtdb_taxonomy.tsv"), header = FALSE, sep = "\t")
+
+# Function to process a single sample
+process_sample <- function(sample_id) {
+  # Read skani results
+  skani <- fread(file.path(root, sample_id, paste0(sample_id, "_SGB.txt")))
+  # Read selected sequence list
+  selected <- fread(file.path(root, sample_id, "input_sc_selected_bc.tsv"), header = FALSE)
+  
+  # Remove duplicate entries based on Query_file
+  skani <- skani[!duplicated(skani$Query_file), ]
+  skani[, annotation := NA_character_]
+  
+  # Iterate over each row to extract reference name and annotation
+  for (i in 1:nrow(skani)) {
+    # Extract reference genome name (remove path and "_genomic.fna.gz")
+    ref <- gsub("_genomic.fna.gz$", "", basename(skani$Ref_file[i]))
+    # Find matching annotation (take the first match)
+    idx <- which(grepl(ref, annot$V1))
+    if (length(idx) > 0) skani$annotation[i] <- annot$V2[idx[1]]
+    # Simplify query file name (remove path and ".fasta")
+    skani$Query_file[i] <- gsub("\\.fasta$", "", basename(skani$Query_file[i]))
+  }
+  
+  # Mark entries with ANI < 95% as "Unclassified"
+  skani[ANI < 95, annotation := "Unclassified"]
+  
+  # Keep only Query_file and annotation columns
+  result <- skani[, .(Query_file, annotation)]
+  
+  # Add missing sequences from selected that are not in the result
+  missing <- setdiff(selected$V1, result$Query_file)
+  if (length(missing) > 0) {
+    result <- rbind(result, data.table(Query_file = missing, annotation = "Unclassified"))
+  }
+  
+  # Write sample-specific output
+  out_file <- paste0(sample_id, "_skani_profile.tsv")
+  write.table(result, file = out_file, sep = "\t", row.names = FALSE, quote = FALSE)
+  return(result)
+}
+
+# List all samples to process
+samples <- c("C282-1", "C282-2", "C282-3", "C295-1", "C295-2", "C295-3")
+
+# Process all samples
+results <- lapply(samples, process_sample)
+
+# Combine all sample results
+combined <- rbindlist(results)
+
+# Calculate relative abundance for each annotation
+stat <- combined[, .N, by = annotation]
+stat[, relative_abundance := 100 * N / nrow(combined)]
+stat <- stat[, .(clade_name = annotation, relative_abundance)]
+
+# Write final combined profile
+write.table(stat, file = "skani_profile.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+#  ==========================================================================================
+# CAP-seq (MetaPhlAn4)
+#  ==========================================================================================
+
+setwd("../CAP-seq (MetaPhlAn4)")
+# Load required package
+library(data.table)
+
+# ------------------------------------------------------------
+# 1. Define the list of samples to process
+# ------------------------------------------------------------
+samples <- c("C282-1", "C282-2", "C282-3", "C295-1", "C295-2", "C295-3")
+
+# ------------------------------------------------------------
+# 2. Read the global SGB-to-GTDB mapping file (shared by all samples)
+#    (Adjust the path if your mapping file is not located at "../../...")
+# ------------------------------------------------------------
+sgb <- fread("mpa_vJan25_CHOCOPhlAnSGB_202503_SGB2GTDB.tsv", 
+             sep = "\t", header = FALSE)
+
+# ------------------------------------------------------------
+# 3. Process each sample individually
+#    - Input file:  merged_output_<sample>.txt  (in the current directory)
+#    - Output file: sc_all_<sample>.tsv         (in the current directory)
+# ------------------------------------------------------------
+for (sample in samples) {
+  
+  # Construct input file name
+  input_file <- paste0( sample,"_output", ".txt")
+  
+  # Check if the file exists (optional but recommended)
+  if (!file.exists(input_file)) {
+    warning(paste("File", input_file, "not found. Skipping sample", sample))
+    next
+  }
+  
+  # Read the sample's data
+  sc <- fread(input_file, header = FALSE)
+  
+  # Remove the ".txt" suffix from cell identifiers (V1)
+  sc$V1 <- gsub(".txt", "", sc$V1)
+  
+  # Prepare a data frame to store classification results for this sample
+  data <- data.frame(cell = unique(sc$V1), clade_name = NA, stringsAsFactors = FALSE)
+  
+  # Classify each unique cell
+  for (i in 1:nrow(data)) {
+    tmp <- sc[sc$V1 == data$cell[i], ]  # all rows for this cell
+    
+    # If only one row, no SGB information -> Unclassified
+    if (nrow(tmp) == 1) {
+      data$clade_name[i] <- "Unclassified"
+      next
+    }
+    
+    # Find rows that contain a SGB identifier (pattern "t__SGB")
+    index <- which(grepl("t__SGB", tmp$V2))
+    
+    # Case 1: exactly one SGB hit -> assign that SGB
+    if (length(index) == 1) {
+      id <- strsplit(tmp$V2[index], split = "t__")[[1]][2]
+      data$clade_name[i] <- sgb$V2[which(sgb$V1 == id)]
+    } else {
+      # Case 2: multiple SGB hits
+      tmp_tmp <- tmp[index, ]
+      
+      # If the highest score (V4) exceeds 95, take the best hit
+      if (max(tmp_tmp$V4) > 95) {
+        max_idx <- which.max(tmp_tmp$V4)
+        id <- strsplit(tmp_tmp$V2[max_idx], split = "t__")[[1]][2]
+        data$clade_name[i] <- sgb$V2[which(sgb$V1 == id)]
+      } else {
+        # Otherwise, the assignment is ambiguous
+        data$clade_name[i] <- "Ambiguous"
+      }
+    }
+  }
+  
+  # Write the per‑sample classification table into the current directory
+  out_file <- paste0("sc_all_", sample, ".tsv")
+  write.table(data, file = out_file, sep = "\t", row.names = FALSE, quote = FALSE)
+}
+
+# ------------------------------------------------------------
+# 4. Combine all per‑sample sc_all_*.tsv files into one data frame
+# ------------------------------------------------------------
+all_data <- data.frame()  # initialise empty data frame
+for (sample in samples) {
+  sample_file <- paste0("sc_all_", sample, ".tsv")
+  if (file.exists(sample_file)) {
+    tmp <- fread(sample_file)
+    all_data <- rbind(all_data, tmp)
+  } else {
+    warning(paste("Per-sample file", sample_file, "not found. Skipping."))
+  }
+}
+
+# ------------------------------------------------------------
+# 5. Remove ambiguous assignments and compute relative abundance
+# ------------------------------------------------------------
+all_data <- all_data[all_data$clade_name != "Ambiguous", ]
+
+# Count occurrences per clade and convert to percentages
+stat <- as.data.frame(table(all_data$clade_name))
+stat$Freq <- 100 * stat$Freq / nrow(all_data)
+colnames(stat) <- c("clade_name", "relative_abundance")
+
+# ------------------------------------------------------------
+# 6. Save the final profile in the current working directory
+# ------------------------------------------------------------
+write.table(stat, file = "sc_profile.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+
+############################################################################################
+####   Comparison for different methods
+############################################################################################
+
 required_packages <- c("tidyverse", "ggvenn", "eulerr", 
                        "ggplot2", "reshape2", "pheatmap", 
                        "vegan", "ggpubr", "ggsci", "ggalluvial")
@@ -25,9 +226,10 @@ metaphlan <- metaphlan[!grepl("unclassified", rownames(metaphlan), ignore.case =
 skani <- skani[!grepl("unclassified", rownames(skani), ignore.case = TRUE), , drop = FALSE]
 sag <- sag[!grepl("unclassified", rownames(sag), ignore.case = TRUE), , drop = FALSE]
 
-# =============================================
-# 2. Extract abundance at a specific taxonomic level
-# =============================================
+#  ==========================================================================================
+# Extract abundance at a specific taxonomic level
+#  ==========================================================================================
+
 # Format: "k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_acidophilus"
 # Function: extract abundances for a given level from a taxonomic abundance matrix
 # df: matrix/data.frame with full taxonomic paths (pipe-separated) as rows, samples as columns
@@ -70,12 +272,45 @@ extract_level <- function(df, level) {
   return(df_wide)
 }
 
+#  ==========================================================================================
+# Merge abundance from  different methods
+#  ==========================================================================================
+
+levels <- c("k", "p", "c", "o", "f", "g", "s")
+level_names <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+for(i in 1:length(levels)){
+  lev <- levels[i]
+  meta_l <- extract_level(metaphlan, lev)
+  index = c(which(rownames(meta_l) == ""))
+  meta_l = meta_l[setdiff(seq(1,nrow(meta_l)),index),,drop = F]
+  meta_l = cbind(Name = rownames(meta_l),Metagenome = meta_l$relative_abundance)
+  
+  skani_l <- extract_level(skani, lev)
+  index = c(which(rownames(skani_l) == ""))
+  skani_l = skani_l[setdiff(seq(1,nrow(skani_l)),index),,drop = F]
+  skani_l = cbind(Name = rownames(skani_l),Single_cell = skani_l$relative_abundance)
+  
+  sag_l <- extract_level(sag, lev)
+  index = c(which(rownames(sag_l) == ""))
+  sag_l = sag_l[setdiff(seq(1,nrow(sag_l)),index),,drop = F]
+  sag_l = cbind(Name = rownames(sag_l),SAG_metagonme = sag_l$relative_abundance)
+  
+  data = merge(meta_l,skani_l,by = "Name",all = TRUE)
+  data = merge(data,sag_l,by = "Name",all = TRUE)
+  data[is.na(data)] = 0
+  writexl::write_xlsx(data,path = paste0("merge_dist_",level_names[i], ".xlsx"))
+  
+}
+
+#  ==========================================================================================
+# alluvial plot
+#  ==========================================================================================
+
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(ggalluvial)   # install.packages("ggalluvial")
+library(ggalluvial) 
 library(grDevices)
-if (!require("scico")) install.packages("scico")
 library(scico)
 install.packages("randtoolbox")
 library(qualpalr)
@@ -222,6 +457,10 @@ for(i in 1:length(levels)){
   ggsave(paste0(level_names[i], "_comparison_sankey.pdf"), 
          plot = p, width = 10, height = 6)
 }
+
+#  ==========================================================================================
+# upset plot
+#  ==========================================================================================
 
 library(UpSetR)
 if(!dir.exists("./upset")) dir.create("./upset")
@@ -418,14 +657,14 @@ for(i in seq_along(levels)) {
     
     safe_samp <- gsub("[^A-Za-z0-9_.-]+", "_", samp)
     
-    # ============================================================
+    #  =========================================================================================================
     # 1. Draw UpSetR plot (optional, shown earlier)
-    # ============================================================
+    #  =========================================================================================================
     
-    # ============================================================
+    #  =========================================================================================================
     # 2. Draw separate abundance bar plot
     #    x-axis order follows the same intersection order as UpSet
-    # ============================================================
+    #  =========================================================================================================
     
     abund_long <- inter_sum %>%
       mutate(
@@ -496,8 +735,10 @@ for(i in seq_along(levels)) {
     message("Saved abundance bar plot: ", outfile_bar)
   }
 }
-#-------------------------------------------------------------------------------
-##diversity
+
+#  ==========================================================================================
+# Diversity calculation
+#  ==========================================================================================
 library(vegan)
 
 df <- readxl::read_xlsx("./merge_dist_Species.xlsx")  
