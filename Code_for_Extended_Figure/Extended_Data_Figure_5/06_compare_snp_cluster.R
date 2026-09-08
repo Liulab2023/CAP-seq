@@ -1,3 +1,49 @@
+#############################################################################
+##--------Process snp calling data for SAG using Snippy----------------------
+library(data.table)
+data1 <- fread("snp_sag_snippy.tsv",sep = "\n",header = F) 
+data = as.data.frame(data1)
+index = which(grepl("==",data1$V1) == TRUE)
+index2 = c((index[2:length(index)]-1),nrow(data1))
+snp = data.frame(ref = "NC_006347.1",pos = 1:5277274,count = 0,REF = NA,A = 0,T = 0,C = 0,G = 0,TYPE = "snp",ALT = NA)
+for(i in 1:length(index)){
+  sample = strsplit(data[index[i],1],split = "/")[[1]][3]
+  tmp = as.data.frame(data[((index[i]+1):index2[i]),])
+  tmp = tmp[which(grepl("snp",tmp[,1]) == TRUE),,drop = F]
+  ind = c()
+  ref = c()
+  ind_a = c()
+  ind_t = c()
+  ind_c = c()
+  ind_g = c()
+  for(j in 1:nrow(tmp)){
+    tt = strsplit(tmp[j,1],split = "\t")[[1]]
+    if(tt[1] == "NC_006347.1"){
+      ind = c(ind,as.numeric(tt[2]))
+      ref = c(ref,tt[4])
+      if(tt[5] == "A"){ind_a = c(ind_a,as.numeric(tt[2]))}
+      if(tt[5] == "T"){ind_t = c(ind_t,as.numeric(tt[2]))}
+      if(tt[5] == "C"){ind_c = c(ind_c,as.numeric(tt[2]))}
+      if(tt[5] == "G"){ind_g = c(ind_g,as.numeric(tt[2]))}
+    }
+  }
+  snp$count[ind] = snp$count[ind] + 1
+  snp$REF[ind] = ref
+  snp$A[ind_a] = snp$A[ind_a] + 1
+  snp$T[ind_t] = snp$T[ind_t] + 1
+  snp$C[ind_c] = snp$C[ind_c] + 1
+  snp$G[ind_g] = snp$G[ind_g] + 1
+}
+snp = snp[which(snp$REF != ""),]
+for(i in 1:nrow(snp)){
+  tmp = snp[i,5:8]
+  snp$ALT[i] = names(which.max(tmp))
+}
+write.table(snp,file = "SNP_CAP-seq_snippy",sep = "\t",quote = F,row.names = F)
+
+#############################################################################
+##----------------Comparison for different methods---------------------------
+#----------------------------------------------------------------------------
 library(tidydr)
 library(dplyr)
 library(data.table)
@@ -156,14 +202,14 @@ p_bar_manual <- ggplot(inter_df, aes(x = factor(xid), y = n)) +
 
 ggsave("upset_top_bar.pdf", p_bar_manual, width = 8, height = 6)
 
-#--------------------------------------------------------------------------
-##hierarchical clustering
+#############################################################################
+##-------------------------hierarchical clustering---------------------------
 library(data.table)
-data1 <- fread("snp.tsv",sep = "\n",header = F) 
-data = as.data.frame(data1)
-index = which(grepl("==",data1$V1) == TRUE)
-index2 = c((index[2:length(index)]-1),nrow(data1))
-pos = fread("snp_all.tsv") 
+data <- fread("snp_sag_snippy.tsv",sep = "\n",header = F) 
+data = as.data.frame(data)
+index = which(grepl("==",data$V1) == TRUE)
+index2 = c((index[2:length(index)]-1),nrow(data))
+pos = fread("SNP_CAP-seq_snippy.tsv") 
 pos = pos[which(pos$count >= 5),]
 
 result = pos[,2,drop = F]
@@ -189,12 +235,12 @@ for(i in 1:length(index)){
 result = as.data.frame(result)
 rownames(result) = result[,1]
 result = result[,-1]
-save(result,file = "snp_dist.RData")
+save(result,file = "snp.RData")
 #-------------------------------------------------------------------
 library(ape)      # for as.phylo
 library(ggtree)   # for tree visualisation (optional)
 library(tidyverse)
-load("snp_dist.RData")
+load("snp.RData")
 result = as.data.frame(result)
 rownames(result) = result[,1]
 result = result[,-1]
